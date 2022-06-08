@@ -1,10 +1,8 @@
-package request;
+package client;
 
-import data.Order;
+import model.Order;
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
-import java.util.List;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.apache.http.HttpStatus.*;
 
 public class OrderClient extends RestAssuredClient {

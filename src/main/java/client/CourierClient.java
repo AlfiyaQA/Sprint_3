@@ -1,11 +1,9 @@
-package request;
+package client;
 
-import data.Courier;
-import data.CourierCredentials;
+import model.Courier;
+import model.CourierCredentials;
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
-import lombok.Data;
-
 import static org.apache.http.HttpStatus.*;
 
 public class CourierClient extends RestAssuredClient {
@@ -14,7 +12,7 @@ public class CourierClient extends RestAssuredClient {
     private final String LOGIN = REGISTRATION + "/login";
     private final String COURIER = REGISTRATION + "/{courierId}";
 
-    @Step("")
+    @Step("Create new courier")
     public ValidatableResponse createCourier(Courier courier) {
         return reqSpec
                 .body(courier)
@@ -23,7 +21,7 @@ public class CourierClient extends RestAssuredClient {
                 .then().log().all();
     }
 
-
+    @Step("Login using credentials")
     public ValidatableResponse loginCourier(CourierCredentials creds) {
         return reqSpec
                 .body(creds)
@@ -32,7 +30,7 @@ public class CourierClient extends RestAssuredClient {
                 .then().log().all();
     }
 
-    //@Step("Delete courier")
+    @Step("Delete courier")
     public void deleteCourier(int courierId) {
         reqSpec
                 .pathParam("courierId", courierId)

@@ -1,4 +1,4 @@
-package data;
+package model;
 
 import lombok.Data;
 import java.util.List;
@@ -33,9 +33,9 @@ public class Order {
                 "Иванов",
                 "ул.Ленина, д.1, кв.2",
                 "Сокольники",
-                "+79870000000000",
+                "+79870000000",
                 3,
-                "2022-06-01",
+                "2022-06-21",
                 "только в будни",
         List.of("BLACK", "GREY"));
     }

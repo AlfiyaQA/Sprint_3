@@ -1,29 +1,32 @@
-import details.MakingOrder;
-import details.Order;
+import client.OrderClient;
+import model.Order;
 import io.qameta.allure.Description;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.ValidatableResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import java.util.List;
+import static org.apache.http.HttpStatus.SC_CREATED;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 @RunWith(Parameterized.class)
 public class OrderTest {
 
-    private MakingOrder makingOrder;
-    private int track;
+    private OrderClient orderClient;
+    public int track;
 
     @Before
     public void setUp() {
-        makingOrder = new MakingOrder();
+        orderClient = new OrderClient();
     }
 
     @After
     public void teardown() {
-        makingOrder.cancel(track);
+        orderClient.cancelOrder(track);
     }
 
     private List<String> color;
@@ -47,8 +50,12 @@ public class OrderTest {
     public void makeOrderUsingColor() {
         Order order = Order.getOrder();
         order.setColor(color);
-        int track = makingOrder.makeOrder(order);
-        assertNotEquals(0, track);
+        ValidatableResponse orderResponse = orderClient.makeOrder(order);
+
+        int statusCode = orderResponse.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_CREATED, statusCode);
+        track = orderResponse.extract().path("track");
+        assertNotEquals("Сравниваемые значения равны", 0, track);
     }
 }
 

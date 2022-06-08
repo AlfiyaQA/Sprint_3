@@ -1,12 +1,14 @@
-import details.Courier;
-import details.CourierClient;
-import details.CourierCredentials;
+import model.Courier;
+import client.CourierClient;
+import model.CourierCredentials;
 import io.qameta.allure.junit4.DisplayName;
+import io.restassured.response.ValidatableResponse;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.apache.http.HttpStatus.*;
 
 public class LoginTest {
 
@@ -20,73 +22,89 @@ public class LoginTest {
 
     @After
     public void teardown() {
-        courierClient.delete(courierId);
+        courierClient.deleteCourier(courierId);
     }
 
     @Test
     @DisplayName("Login using correct data")
     public void loginUsingCorrectData() {
-        Courier courier = Courier.getCourierOne();
-        courierClient.create(courier);
+        Courier courier = Courier.getRandom();
+        courierClient.createCourier(courier);
 
         CourierCredentials creds = CourierCredentials.from(courier);
-        courierId = courierClient.login(creds);
-        assertNotEquals(0, courierId);
+        ValidatableResponse loginResponse = courierClient.loginCourier(creds);
+        int statusCode = loginResponse.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_OK, statusCode);
+        courierId = loginResponse.extract().path("id");
+        assertNotEquals("Сравниваемые значения равны", 0, courierId);
     }
 
     @Test
     @DisplayName("Login using incorrect login")
     public void loginUsingIncorrectLogin() {
-        Courier courier = Courier.getCourierOne();
-        courierClient.create(courier);
+        Courier courier = Courier.getRandom();
+        courierClient.createCourier(courier);
 
         CourierCredentials creds = CourierCredentials.from(courier);
-        courierId = courierClient.login(creds);
+        ValidatableResponse loginResponse = courierClient.loginCourier(creds);
+        courierId = loginResponse.extract().path("id");
 
-        CourierCredentials credentials = new CourierCredentials(RandomStringUtils.randomAlphanumeric(20), courier.getPassword());
-        String result = courierClient.loginIncorrectData(credentials);
-        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", result);
+        ValidatableResponse loginResponse2 = courierClient.loginCourier(new CourierCredentials(RandomStringUtils.randomAlphanumeric(20), courier.getPassword()));
+        int statusCode = loginResponse2.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_NOT_FOUND, statusCode);
+        String message = loginResponse2.extract().path("message");
+        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", message);
     }
 
     @Test
     @DisplayName("Login using incorrect password")
     public void loginUsingIncorrectPassword() {
-        Courier courier = Courier.getCourierOne();
-        courierClient.create(courier);
+        Courier courier = Courier.getRandom();
+        courierClient.createCourier(courier);
 
         CourierCredentials creds = CourierCredentials.from(courier);
-        courierId = courierClient.login(creds);
+        ValidatableResponse loginResponse = courierClient.loginCourier(creds);
+        courierId = loginResponse.extract().path("id");
 
-        CourierCredentials credentials = new CourierCredentials(courier.getLogin(), RandomStringUtils.randomAlphanumeric(20));
-        String result = courierClient.loginIncorrectData(credentials);
-        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", result);
+        ValidatableResponse loginResponse2  = courierClient.loginCourier(new CourierCredentials(courier.getLogin(), RandomStringUtils.randomAlphanumeric(20)));
+        int statusCode = loginResponse2.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_NOT_FOUND, statusCode);
+        String message = loginResponse2.extract().path("message");
+        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", message);
     }
 
     @Test
     @DisplayName("Login with non-existing data")
     public void loginUsingNonExistingData() {
-        Courier courier = Courier.getCourierOne();
-        courierClient.create(courier);
+        Courier courier = Courier.getRandom();
+        courierClient.createCourier(courier);
 
         CourierCredentials creds = CourierCredentials.from(courier);
-        courierId = courierClient.login(creds);
+        ValidatableResponse loginResponse = courierClient.loginCourier(creds);
+        courierId = loginResponse.extract().path("id");
 
-        CourierCredentials credentials = new CourierCredentials(RandomStringUtils.randomAlphanumeric(20), RandomStringUtils.randomAlphanumeric(20));
-        String result = courierClient.loginIncorrectData(credentials);
-        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", result);
+        ValidatableResponse loginResponse2 = courierClient.loginCourier(new CourierCredentials(RandomStringUtils.randomAlphanumeric(20), RandomStringUtils.randomAlphanumeric(20)));
+        int statusCode = loginResponse2.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_NOT_FOUND, statusCode);
+        String message = loginResponse2.extract().path("message");
+        assertEquals("Ответ метода отличается от ожидаемого результата", "Учетная запись не найдена", message);
     }
 
     @Test
     @DisplayName("Login without required fields")
     public void loginWithoutRequiredFields() {
-        Courier courier = Courier.getCourierOne();
-        courierClient.create(courier);
+        Courier courier = Courier.getRandom();
+        courierClient.createCourier(courier);
 
         CourierCredentials creds = CourierCredentials.from(courier);
-        courierId = courierClient.login(creds);
+        ValidatableResponse loginResponse = courierClient.loginCourier(creds);
+        courierId = loginResponse.extract().path("id");
 
-        CourierCredentials credentials = new CourierCredentials(courier.getLogin(), "");
-        String result = courierClient.loginWithoutData(credentials);
-        assertEquals("Ответ метода отличается от ожидаемого результата", "Недостаточно данных для входа", result);
+        ValidatableResponse loginResponse2 = courierClient.loginCourier(new CourierCredentials(null, courier.getPassword()));
+        int statusCode = loginResponse2.extract().statusCode();
+        assertEquals("Код статуса отличается от ожидаемого результата", SC_BAD_REQUEST, statusCode);
+        String message = loginResponse2.extract().path("message");
+        assertEquals("Ответ метода отличается от ожидаемого результата", "Недостаточно данных для входа", message);
     }
 }
+
