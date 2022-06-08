@@ -1,4 +1,4 @@
-package details;
+package request;
 
 import io.restassured.specification.RequestSpecification;
 

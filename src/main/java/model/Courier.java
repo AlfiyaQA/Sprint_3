@@ -1,4 +1,4 @@
-package details;
+package data;
 
 import lombok.Data;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -15,7 +15,7 @@ public class Courier {
         this.firstName = firstName;
     }
 
-    public static Courier getCourierOne() {
+    public static Courier getRandom() {
         String login = RandomStringUtils.randomAlphanumeric(20);
         String password = RandomStringUtils.randomAlphanumeric(20);
         String lastName = RandomStringUtils.randomAlphanumeric(20);
@@ -23,7 +23,7 @@ public class Courier {
         return new Courier(login, password, lastName);
     }
 
-    public static Courier getCourierTwo() {
+    /*public static Courier getCourierTwo() {
         String login = "portyma";
         String password = "12345";
         String lastName = "Иванов";
@@ -43,5 +43,16 @@ public class Courier {
         String login = RandomStringUtils.randomAlphanumeric(20);
 
         return new Courier(login, null, null);
+    }*/
+
+
+    public Courier getCourier() {
+        return new Courier(login, password, firstName);
+    }
+    public String getLogin() {
+        return login;
+    }
+    public String getPassword() {
+        return password;
     }
 }

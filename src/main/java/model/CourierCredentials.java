@@ -1,4 +1,4 @@
-package details;
+package data;
 
 import lombok.Data;
 
